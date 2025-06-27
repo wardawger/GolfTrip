@@ -1,10 +1,14 @@
 import { Player, HoleScore, Team, Segment } from '../types';
 import { courseData, courseDataByDay } from '../data/course';
 
-export const calculateNetScore = (grossScore: number, handicap: number, holeNumber: number): number => {
+export const calculateNetScore = (grossScore: number, handicap: number, holeNumber: number, day: number = 1): number => {
+  const courseHoles = courseDataByDay[day as keyof typeof courseDataByDay] || courseData;
+  const hole = courseHoles.find(h => h.hole === holeNumber);
+  const holeHandicap = hole && 'handicap' in hole ? hole.handicap : holeNumber;
+  
   const strokesPerHole = Math.floor(handicap / 18);
   const extraStrokes = handicap % 18;
-  const additionalStroke = holeNumber <= extraStrokes ? 1 : 0;
+  const additionalStroke = holeHandicap <= extraStrokes ? 1 : 0;
   return grossScore - strokesPerHole - additionalStroke;
 };
 
@@ -22,7 +26,7 @@ export const calculateAsteriskNetScore = (
   bonusStrokesUsed: number = 0,
   day: number = 1
 ): number => {
-  const regularNetScore = calculateNetScore(grossScore, handicap, holeNumber);
+  const regularNetScore = calculateNetScore(grossScore, handicap, holeNumber, day);
   const bonusStrokes = calculateAsteriskBonusStrokes(holeNumber, day);
   const unusedBonusStrokes = bonusStrokes - bonusStrokesUsed;
   return regularNetScore - unusedBonusStrokes;

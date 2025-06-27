@@ -58,7 +58,7 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
     if (player.isAsterisk) {
       return calculateAsteriskNetScore(grossScore, player.handicap, selectedHole, bonusUsed, day);
     }
-    return calculateNetScore(grossScore, player.handicap, selectedHole);
+    return calculateNetScore(grossScore, player.handicap, selectedHole, day);
   };
 
   const saveScores = () => {
@@ -87,6 +87,8 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
   };
 
   const getMaxBonusStrokes = () => calculateAsteriskBonusStrokes(selectedHole, day);
+
+  const currentHole = getCurrentHole();
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -134,6 +136,9 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
               >
                 <div>{hole.hole}</div>
                 <div className="text-xs opacity-75">Par {hole.par}</div>
+                {'handicap' in hole && (
+                  <div className="text-xs opacity-60">HCP {hole.handicap}</div>
+                )}
               </button>
             ))}
           </div>
@@ -143,7 +148,10 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
         <div className="p-6">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Hole {selectedHole} - Par {getCurrentHole().par}
+              Hole {selectedHole} - Par {currentHole.par}
+              {'handicap' in currentHole && (
+                <span className="text-sm text-gray-600 ml-2">(Handicap {currentHole.handicap})</span>
+              )}
             </h3>
           </div>
 
