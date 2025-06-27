@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ currentDay, onDayChange }) => {
             <div className="flex items-center space-x-3">
               <Trophy className="h-8 w-8 text-yellow-400" />
               <div>
-                <h1 className="text-2xl font-bold">Modified Cha Cha Cha</h1>
+                <h1 className="text-2xl font-bold">The Web</h1>
                 <p className="text-green-200">Golf Tournament Scoring</p>
               </div>
             </div>
