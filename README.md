@@ -1,4 +1,4 @@
-# ⛳ Cha Cha Cha Golf Trip App
+# ⛳ The Web Golf Trip App
 
 A React app built with [Bolt.new](https://bolt.new) to manage a rotating golf game format for an 11-player group trip. This app handles team assignments, scoring, payout breakdowns, and modified handicap rules.
 
@@ -21,13 +21,13 @@ Each round is divided into **three 6-hole segments** using a rotating net best b
 
 ## 💸 Entry & Payout Structure
 
-- **$30 per player per day**  
-- **11 players = $330/day total pot**
-- **$60 removed daily for skins**
-- **$270 split into 3 payouts:**
-  - Holes 1–6 winner → $30
-  - Holes 7–12 winner → $30
-  - Holes 13–18 winner → $30
+- **$100 per player total**  
+- **11 players = $1,100 total pot**
+- **$200 removed for skins**
+- **$900 split into 3 payouts each day:**
+  - Holes 1–6 winner → $100
+  - Holes 7–12 winner → $100
+  - Holes 13–18 winner → $100
 
 Skins payouts are handled separately.
 
