@@ -1,0 +1,99 @@
+export const courseData = [
+  { hole: 1, par: 4 },
+  { hole: 2, par: 5 },
+  { hole: 3, par: 3 },
+  { hole: 4, par: 5 },
+  { hole: 5, par: 5 },
+  { hole: 6, par: 5 },
+  { hole: 7, par: 3 },
+  { hole: 8, par: 4 },
+  { hole: 9, par: 3 },
+  { hole: 10, par: 4 },
+  { hole: 11, par: 4 },
+  { hole: 12, par: 5 },
+  { hole: 13, par: 4 },
+  { hole: 14, par: 3 },
+  { hole: 15, par: 5 },
+  { hole: 16, par: 4 },
+  { hole: 17, par: 4 },
+  { hole: 18, par: 4 }
+];
+
+export const segments = [
+  { holes: [1, 2, 3], name: 'Holes 1-3', scoringType: 'best1' as const },
+  { holes: [4, 5, 6], name: 'Holes 4-6', scoringType: 'best2' as const },
+  { holes: [7, 8, 9], name: 'Holes 7-9', scoringType: 'best1' as const },
+  { holes: [10, 11, 12], name: 'Holes 10-12', scoringType: 'best2' as const },
+  { holes: [13, 14, 15], name: 'Holes 13-15', scoringType: 'best1' as const },
+  { holes: [16, 17, 18], name: 'Holes 16-18', scoringType: 'best2' as const }
+];
+
+export const payoutSegments = [
+  { holes: [1, 2, 3, 4, 5, 6], name: 'Holes 1-6', payout: 100 },
+  { holes: [7, 8, 9, 10, 11, 12], name: 'Holes 7-12', payout: 100 },
+  { holes: [13, 14, 15, 16, 17, 18], name: 'Holes 13-18', payout: 100 }
+];
+
+// Day-specific course data
+export const courseDataByDay = {
+  1: [
+    { hole: 1, par: 4 }, // Southern Pines
+    { hole: 2, par: 5 },
+    { hole: 3, par: 3 },
+    { hole: 4, par: 5 },
+    { hole: 5, par: 5 },
+    { hole: 6, par: 5 },
+    { hole: 7, par: 3 },
+    { hole: 8, par: 4 },
+    { hole: 9, par: 3 },
+    { hole: 10, par: 4 },
+    { hole: 11, par: 4 },
+    { hole: 12, par: 5 },
+    { hole: 13, par: 4 },
+    { hole: 14, par: 3 },
+    { hole: 15, par: 5 },
+    { hole: 16, par: 4 },
+    { hole: 17, par: 4 },
+    { hole: 18, par: 4 }
+  ],
+  2: [
+    { hole: 1, par: 4 }, // Tot Hill Farm
+    { hole: 2, par: 4 },
+    { hole: 3, par: 3 },
+    { hole: 4, par: 5 },
+    { hole: 5, par: 5 },
+    { hole: 6, par: 3 },
+    { hole: 7, par: 4 },
+    { hole: 8, par: 5 },
+    { hole: 9, par: 4 },
+    { hole: 10, par: 4 },
+    { hole: 11, par: 3 },
+    { hole: 12, par: 4 },
+    { hole: 13, par: 3 },
+    { hole: 14, par: 4 },
+    { hole: 15, par: 3 },
+    { hole: 16, par: 5 },
+    { hole: 17, par: 4 },
+    { hole: 18, par: 5 }
+  ],
+  3: [
+    { hole: 1, par: 5 }, // Tobacco Road
+    { hole: 2, par: 4 },
+    { hole: 3, par: 3 },
+    { hole: 4, par: 5 },
+    { hole: 5, par: 4 },
+    { hole: 6, par: 3 },
+    { hole: 7, par: 4 },
+    { hole: 8, par: 3 },
+    { hole: 9, par: 4 },
+    { hole: 10, par: 4 },
+    { hole: 11, par: 5 },
+    { hole: 12, par: 4 },
+    { hole: 13, par: 5 },
+    { hole: 14, par: 3 },
+    { hole: 15, par: 4 },
+    { hole: 16, par: 4 },
+    { hole: 17, par: 3 },
+    { hole: 18, par: 4 }
+  ]
+};
