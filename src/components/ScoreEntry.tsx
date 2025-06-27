@@ -90,6 +90,22 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
 
   const currentHole = getCurrentHole();
 
+  // Save button component to avoid duplication
+  const SaveButton = ({ className = "" }: { className?: string }) => (
+    <button
+      onClick={saveScores}
+      className={`flex items-center space-x-2 ${
+        isSaving 
+          ? "bg-green-500 text-white" 
+          : "bg-green-600 text-white hover:bg-green-700"
+      } px-4 py-2 rounded-lg transition-colors ${className}`}
+      disabled={isSaving}
+    >
+      <Save className="h-4 w-4" />
+      <span>{isSaving ? "Saved!" : "Save"}</span>
+    </button>
+  );
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-lg">
@@ -106,18 +122,7 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
               <h2 className="text-xl font-bold text-gray-900">{team.name}</h2>
               <p className="text-gray-600">Day {day} Scoring</p>
             </div>
-            <button
-              onClick={saveScores}
-              className={`flex items-center space-x-2 ${
-                isSaving 
-                  ? "bg-green-500 text-white" 
-                  : "bg-green-600 text-white hover:bg-green-700"
-              } px-4 py-2 rounded-lg transition-colors`}
-              disabled={isSaving}
-            >
-              <Save className="h-4 w-4" />
-              <span>{isSaving ? "Saved!" : "Save"}</span>
-            </button>
+            <SaveButton />
           </div>
         </div>
 
@@ -224,6 +229,13 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Bottom Save Button */}
+        <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex justify-end">
+            <SaveButton />
           </div>
         </div>
       </div>
