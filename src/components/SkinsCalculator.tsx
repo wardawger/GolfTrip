@@ -1,3 +1,4 @@
+<parameter name="filePath">src/components/SkinsCalculator.tsx</parameter>
 import React, { useState, useEffect } from 'react';
 import { SkinsPlayer, SkinsGame } from '../types/skins';
 import { players as allPlayers } from '../data/players';
@@ -54,6 +55,9 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
         }));
     });
 
+    console.log('Hole scores for skins calculation:', skinsHoleScores);
+    console.log('Selected players:', selectedPlayers);
+
     const game = calculateSkinsGame(selectedPlayers, skinsHoleScores, totalPot, selectedDay);
     setSkinsGame(game);
     setShowResults(true);
@@ -63,6 +67,10 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
     setSkinsGame(null);
     setShowResults(false);
   };
+
+  // Debug: Show available scores
+  const debugHoleScores = getAllHoleScores(selectedDay);
+  const hasScores = Object.keys(debugHoleScores).length > 0;
 
   if (showResults && skinsGame) {
     return <SkinsResults game={skinsGame} onBack={resetCalculator} onMainBack={onBack} />;
@@ -112,6 +120,19 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
                   Day {day}
                 </button>
               ))}
+            </div>
+            
+            {/* Debug info */}
+            <div className="mt-2 text-sm text-gray-600">
+              {hasScores ? (
+                <span className="text-green-600">
+                  ✓ Scores available for Day {selectedDay} ({Object.keys(debugHoleScores).length} holes with scores)
+                </span>
+              ) : (
+                <span className="text-orange-600">
+                  ⚠ No scores found for Day {selectedDay}. Enter scores first in the Score Entry tab.
+                </span>
+              )}
             </div>
           </div>
 
@@ -177,9 +198,9 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
           <div className="flex justify-center pt-4">
             <button
               onClick={calculateSkins}
-              disabled={selectedPlayers.length < 2}
+              disabled={selectedPlayers.length < 2 || !hasScores}
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                selectedPlayers.length >= 2
+                selectedPlayers.length >= 2 && hasScores
                   ? 'bg-green-600 text-white hover:bg-green-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
@@ -187,6 +208,11 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
               <Calculator className="h-5 w-5" />
               <span>Calculate Skins</span>
             </button>
+            {selectedPlayers.length >= 2 && !hasScores && (
+              <p className="text-sm text-orange-600 mt-2 text-center">
+                Please enter scores for Day {selectedDay} first
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -313,7 +339,7 @@ const SkinsResults: React.FC<SkinsResultsProps> = ({ game, onBack, onMainBack })
                           return (
                             <div key={score.playerId} className={`flex justify-between ${isWinner ? 'font-semibold text-green-700' : 'text-gray-600'}`}>
                               <span>{player?.name}</span>
-                              <span>{score.netScore}</span>
+                              <span>{score.netScore} (gross: {score.grossScore})</span>
                             </div>
                           );
                         })
