@@ -6,8 +6,16 @@ export const calculateSkinsNetScore = (
   grossScore: number,
   handicap: number,
   holeNumber: number,
-  day: number
+  day: number,
+  playerName?: string
 ): number => {
+  // Designated players (Drew, Dan Y, MJ, Bryan) use gross scores only for skins
+  const designatedPlayers = ['Drew', 'Dan Y', 'MJ', 'Bryan'];
+  
+  if (playerName && designatedPlayers.includes(playerName)) {
+    return grossScore;
+  }
+  
   return calculateNetScore(grossScore, handicap, holeNumber, day);
 };
 
@@ -64,7 +72,7 @@ export const calculateSkinsGame = (
       .filter(score => players.some(p => p.id === score.playerId))
       .map(score => {
         const player = players.find(p => p.id === score.playerId)!;
-        const netScore = calculateSkinsNetScore(score.grossScore, player.handicap, holeNum, day);
+        const netScore = calculateSkinsNetScore(score.grossScore, player.handicap, holeNum, day, player.name);
         return {
           playerId: score.playerId,
           grossScore: score.grossScore,
