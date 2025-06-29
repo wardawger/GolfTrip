@@ -32,28 +32,6 @@ export const calculateAsteriskNetScore = (
   return regularNetScore - unusedBonusStrokes;
 };
 
-// New function to calculate the final score for team calculations
-export const calculateFinalScore = (player: Player, grossScore: number, bonusStrokesUsed: number = 0, holeNumber: number, day: number = 1): number => {
-  // Designated players (Drew, Dan Y, MJ, Bryan) use gross scores only
-  const designatedPlayers = ['Drew', 'Dan Y', 'MJ', 'Bryan'];
-  
-  if (designatedPlayers.includes(player.name)) {
-    // For designated players, return gross score minus any unused bonus strokes
-    if (player.isAsterisk) {
-      const bonusStrokes = calculateAsteriskBonusStrokes(holeNumber, day);
-      const unusedBonusStrokes = bonusStrokes - bonusStrokesUsed;
-      return grossScore - unusedBonusStrokes;
-    }
-    return grossScore;
-  }
-  
-  // For all other players, use standard net scoring
-  if (player.isAsterisk) {
-    return calculateAsteriskNetScore(grossScore, player.handicap, holeNumber, bonusStrokesUsed, day);
-  }
-  return calculateNetScore(grossScore, player.handicap, holeNumber, day);
-};
-
 export const calculateTeamSegmentScore = (
   team: Team, 
   segment: Segment, 
@@ -66,25 +44,7 @@ export const calculateTeamSegmentScore = (
     const holesScores = holeScores[holeNumber] || [];
     const teamPlayerScores = holesScores.filter(score => 
       team.players.some(player => player.id === score.playerId)
-    ).map(score => {
-      // Find the player to get their information
-      const player = team.players.find(p => p.id === score.playerId);
-      if (!player) return score;
-      
-      // Calculate the final score using the new logic
-      const finalScore = calculateFinalScore(
-        player, 
-        score.grossScore, 
-        score.bonusStrokesUsed || 0, 
-        holeNumber, 
-        day
-      );
-      
-      return {
-        ...score,
-        netScore: finalScore // Override netScore with final calculated score
-      };
-    });
+    );
 
     if (teamPlayerScores.length === 0) return;
 

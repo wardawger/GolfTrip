@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Team, Player, HoleScore } from '../types';
 import { courseDataByDay } from '../data/course';
-import { calculateNetScore, calculateAsteriskNetScore, calculateAsteriskBonusStrokes, calculateFinalScore } from '../utils/scoring';
-import { ArrowLeft, Save, Star, MapPin } from 'lucide-react';
+import { calculateNetScore, calculateAsteriskNetScore, calculateAsteriskBonusStrokes } from '../utils/scoring';
+import { ArrowLeft, Save, Star } from 'lucide-react';
 
 interface ScoreEntryProps {
   team: Team;
@@ -11,15 +11,6 @@ interface ScoreEntryProps {
   getHoleScores: (day: number, hole: number) => HoleScore[];
   updateHoleScore: (day: number, hole: number, playerId: string, score: Partial<HoleScore>) => void;
 }
-
-const getCourseInfo = (day: number) => {
-  const courseNames = {
-    1: 'Southern Hills',
-    2: 'Tot Hill Farm', 
-    3: 'Tobacco Road'
-  };
-  return courseNames[day as keyof typeof courseNames] || 'Unknown Course';
-};
 
 export const ScoreEntry: React.FC<ScoreEntryProps> = ({
   team,
@@ -64,20 +55,10 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
   };
 
   const calculatePlayerNetScore = (player: Player, grossScore: number, bonusUsed: number = 0) => {
-    // For display purposes, show the traditional net score calculation
     if (player.isAsterisk) {
       return calculateAsteriskNetScore(grossScore, player.handicap, selectedHole, bonusUsed, day);
     }
     return calculateNetScore(grossScore, player.handicap, selectedHole, day);
-  };
-
-  const calculatePlayerFinalScore = (player: Player, grossScore: number, bonusUsed: number = 0) => {
-    // This is what will be used for team calculations
-    return calculateFinalScore(player, grossScore, bonusUsed, selectedHole, day);
-  };
-
-  const isDesignatedPlayer = (playerName: string) => {
-    return ['Drew', 'Dan Y', 'MJ', 'Bryan'].includes(playerName);
   };
 
   const saveScores = () => {
@@ -88,7 +69,7 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
       if (playerScore?.gross && !isNaN(Number(playerScore.gross))) {
         const grossScore = Number(playerScore.gross);
         const bonusUsed = player.isAsterisk ? Number(playerScore.bonusUsed) || 0 : 0;
-        const netScore = calculatePlayerFinalScore(player, grossScore, bonusUsed);
+        const netScore = calculatePlayerNetScore(player, grossScore, bonusUsed);
         
         updateHoleScore(day, selectedHole, player.id, {
           playerId: player.id,
@@ -139,14 +120,7 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
             </button>
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-900">{team.name}</h2>
-              <div className="flex items-center justify-center space-x-2 text-gray-600 mt-1">
-                <span>Day {day} Scoring</span>
-                <span>•</span>
-                <div className="flex items-center space-x-1">
-                  <MapPin className="h-3 w-3" />
-                  <span className="text-sm">{getCourseInfo(day)}</span>
-                </div>
-              </div>
+              <p className="text-gray-600">Day {day} Scoring</p>
             </div>
             <SaveButton />
           </div>
@@ -191,10 +165,8 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
               const playerScore = scores[player.id] || { gross: '', bonusUsed: '0' };
               const grossScore = Number(playerScore.gross) || 0;
               const bonusUsed = Number(playerScore.bonusUsed) || 0;
-              const displayNetScore = grossScore > 0 ? calculatePlayerNetScore(player, grossScore, bonusUsed) : 0;
-              const finalScore = grossScore > 0 ? calculatePlayerFinalScore(player, grossScore, bonusUsed) : 0;
+              const netScore = grossScore > 0 ? calculatePlayerNetScore(player, grossScore, bonusUsed) : 0;
               const maxBonus = getMaxBonusStrokes();
-              const isDesignated = isDesignatedPlayer(player.name);
 
               return (
                 <div key={player.id} className="bg-gray-50 rounded-lg p-4">
@@ -203,25 +175,9 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
                       <span className="font-medium text-gray-900">{player.name}</span>
                       {player.isAsterisk && <Star className="h-4 w-4 text-amber-500" />}
                       <span className="text-sm text-gray-500">HCP {player.handicap}</span>
-                      {isDesignated && (
-                        <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                          No Handicap
-                        </span>
-                      )}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {isDesignated ? (
-                        <span>Final Score: <span className="font-semibold">{finalScore || '-'}</span></span>
-                      ) : (
-                        <>
-                          Net Score: <span className="font-semibold">{displayNetScore || '-'}</span>
-                          {finalScore !== displayNetScore && (
-                            <span className="ml-2 text-orange-600">
-                              (Final: {finalScore || '-'})
-                            </span>
-                          )}
-                        </>
-                      )}
+                      Net Score: <span className="font-semibold">{netScore || '-'}</span>
                     </div>
                   </div>
 
@@ -263,17 +219,10 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
 
                     <div className="flex items-end">
                       <div className="text-center">
-                        <div className="text-sm text-gray-500">
-                          {isDesignated ? 'Final Score' : 'Net Score'}
-                        </div>
+                        <div className="text-sm text-gray-500">Net Score</div>
                         <div className="text-2xl font-bold text-green-600">
-                          {isDesignated ? (finalScore || '-') : (displayNetScore || '-')}
+                          {netScore || '-'}
                         </div>
-                        {!isDesignated && finalScore !== displayNetScore && (
-                          <div className="text-xs text-orange-600 mt-1">
-                            Final: {finalScore || '-'}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

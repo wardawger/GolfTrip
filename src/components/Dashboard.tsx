@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { TeamCard } from './TeamCard';
 import { ScoreEntry } from './ScoreEntry';
 import { ResultsView } from './ResultsView';
-import { SkinsCalculator } from './SkinsCalculator';
 import { Team } from '../types';
-import { BarChart3, Target, Calculator, MapPin } from 'lucide-react';
+import { BarChart3, Target } from 'lucide-react';
 
 interface DashboardProps {
   currentDay: number;
@@ -14,15 +13,6 @@ interface DashboardProps {
   updateHoleScore: (day: number, hole: number, playerId: string, score: any) => void;
 }
 
-const getCourseInfo = (day: number) => {
-  const courseNames = {
-    1: 'Southern Hills',
-    2: 'Tot Hill Farm', 
-    3: 'Tobacco Road'
-  };
-  return courseNames[day as keyof typeof courseNames] || 'Unknown Course';
-};
-
 export const Dashboard: React.FC<DashboardProps> = ({
   currentDay,
   teams,
@@ -31,7 +21,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   updateHoleScore
 }) => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
-  const [activeTab, setActiveTab] = useState<'teams' | 'results' | 'skins'>('teams');
+  const [activeTab, setActiveTab] = useState<'teams' | 'results'>('teams');
 
   if (selectedTeam) {
     return (
@@ -41,14 +31,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         onBack={() => setSelectedTeam(null)}
         getHoleScores={getHoleScores}
         updateHoleScore={updateHoleScore}
-      />
-    );
-  }
-
-  if (activeTab === 'skins') {
-    return (
-      <SkinsCalculator
-        onBack={() => setActiveTab('teams')}
       />
     );
   }
@@ -84,32 +66,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span>Results & Payouts</span>
             </div>
           </button>
-          <button
-            onClick={() => setActiveTab('skins')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'skins'
-                ? 'border-green-500 text-green-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <div className="flex items-center space-x-2">
-              <Calculator className="h-4 w-4" />
-              <span>Skins Calculator</span>
-            </div>
-          </button>
         </nav>
       </div>
 
       {activeTab === 'teams' ? (
         <div>
           <div className="mb-6">
-            <div className="flex items-center space-x-3 mb-2">
-              <h2 className="text-2xl font-bold text-gray-900">Day {currentDay} Teams</h2>
-              <div className="flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full">
-                <MapPin className="h-4 w-4" />
-                <span className="font-medium">{getCourseInfo(currentDay)}</span>
-              </div>
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Day {currentDay} Teams</h2>
             <p className="text-gray-600">Select a team to enter scores</p>
           </div>
 
