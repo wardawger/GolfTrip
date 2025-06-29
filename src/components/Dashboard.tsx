@@ -4,7 +4,7 @@ import { ScoreEntry } from './ScoreEntry';
 import { ResultsView } from './ResultsView';
 import { SkinsCalculator } from './SkinsCalculator';
 import { Team } from '../types';
-import { BarChart3, Target, Calculator } from 'lucide-react';
+import { BarChart3, Target, Calculator, MapPin } from 'lucide-react';
 
 interface DashboardProps {
   currentDay: number;
@@ -13,6 +13,15 @@ interface DashboardProps {
   getAllHoleScores: (day: number) => { [hole: number]: any[] };
   updateHoleScore: (day: number, hole: number, playerId: string, score: any) => void;
 }
+
+const getCourseInfo = (day: number) => {
+  const courseNames = {
+    1: 'Southern Hills',
+    2: 'Tot Hill Farm', 
+    3: 'Tobacco Road'
+  };
+  return courseNames[day as keyof typeof courseNames] || 'Unknown Course';
+};
 
 export const Dashboard: React.FC<DashboardProps> = ({
   currentDay,
@@ -94,7 +103,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeTab === 'teams' ? (
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Day {currentDay} Teams</h2>
+            <div className="flex items-center space-x-3 mb-2">
+              <h2 className="text-2xl font-bold text-gray-900">Day {currentDay} Teams</h2>
+              <div className="flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                <MapPin className="h-4 w-4" />
+                <span className="font-medium">{getCourseInfo(currentDay)}</span>
+              </div>
+            </div>
             <p className="text-gray-600">Select a team to enter scores</p>
           </div>
 
