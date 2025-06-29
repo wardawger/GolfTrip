@@ -1,10 +1,9 @@
-<parameter name="filePath">src/components/SkinsCalculator.tsx</parameter>
 import React, { useState, useEffect } from 'react';
 import { SkinsPlayer, SkinsGame } from '../types/skins';
 import { players as allPlayers } from '../data/players';
 import { calculateSkinsGame, getSkinsGameSummary } from '../utils/skinsCalculator';
 import { useGameState } from '../hooks/useGameState';
-import { DollarSign, Trophy, Users, Calculator, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { DollarSign, Trophy, Users, Calculator, ArrowLeft, Plus, Minus, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface SkinsCalculatorProps {
   onBack: () => void;
@@ -18,6 +17,16 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
   const [showResults, setShowResults] = useState(false);
   
   const { getAllHoleScores } = useGameState();
+
+  // Auto-select all players on component mount
+  useEffect(() => {
+    const allSkinsPlayers: SkinsPlayer[] = allPlayers.map(player => ({
+      id: player.id,
+      name: player.name,
+      handicap: player.handicap
+    }));
+    setSelectedPlayers(allSkinsPlayers);
+  }, []);
 
   const togglePlayer = (player: typeof allPlayers[0]) => {
     const skinsPlayer: SkinsPlayer = {
@@ -37,6 +46,57 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
     });
   };
 
+  // Get detailed score analysis for validation
+  const getScoreAnalysis = () => {
+    const holeScores = getAllHoleScores(selectedDay);
+    const analysis = {
+      totalHoles: 18,
+      holesWithScores: 0,
+      playerScoreCount: {} as { [playerId: string]: number },
+      invalidScores: [] as { hole: number; playerId: string; score: number }[],
+      missingPlayers: [] as string[],
+      totalScoresEntered: 0
+    };
+
+    // Initialize player score counts
+    selectedPlayers.forEach(player => {
+      analysis.playerScoreCount[player.id] = 0;
+    });
+
+    // Analyze each hole
+    for (let hole = 1; hole <= 18; hole++) {
+      const holeData = holeScores[hole] || [];
+      if (holeData.length > 0) {
+        analysis.holesWithScores++;
+      }
+
+      holeData.forEach(score => {
+        if (selectedPlayers.some(p => p.id === score.playerId)) {
+          analysis.playerScoreCount[score.playerId]++;
+          analysis.totalScoresEntered++;
+
+          // Check for invalid scores
+          if (score.grossScore < 1 || score.grossScore > 15) {
+            analysis.invalidScores.push({
+              hole,
+              playerId: score.playerId,
+              score: score.grossScore
+            });
+          }
+        }
+      });
+    }
+
+    // Find players with missing scores
+    selectedPlayers.forEach(player => {
+      if (analysis.playerScoreCount[player.id] === 0) {
+        analysis.missingPlayers.push(player.name);
+      }
+    });
+
+    return analysis;
+  };
+
   const calculateSkins = () => {
     if (selectedPlayers.length < 2) return;
 
@@ -49,14 +109,19 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
       const hole = parseInt(holeStr);
       skinsHoleScores[hole] = scores
         .filter(score => selectedPlayers.some(p => p.id === score.playerId))
+        .filter(score => score.grossScore > 0) // Only include valid scores
         .map(score => ({
           playerId: score.playerId,
           grossScore: score.grossScore
         }));
     });
 
-    console.log('Hole scores for skins calculation:', skinsHoleScores);
-    console.log('Selected players:', selectedPlayers);
+    console.log('Skins calculation data:', {
+      selectedPlayers: selectedPlayers.length,
+      holeScores: skinsHoleScores,
+      totalPot,
+      day: selectedDay
+    });
 
     const game = calculateSkinsGame(selectedPlayers, skinsHoleScores, totalPot, selectedDay);
     setSkinsGame(game);
@@ -68,9 +133,9 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
     setShowResults(false);
   };
 
-  // Debug: Show available scores
-  const debugHoleScores = getAllHoleScores(selectedDay);
-  const hasScores = Object.keys(debugHoleScores).length > 0;
+  const scoreAnalysis = getScoreAnalysis();
+  const hasValidScores = scoreAnalysis.totalScoresEntered > 0 && scoreAnalysis.missingPlayers.length === 0;
+  const canCalculate = selectedPlayers.length >= 2 && hasValidScores;
 
   if (showResults && skinsGame) {
     return <SkinsResults game={skinsGame} onBack={resetCalculator} onMainBack={onBack} />;
@@ -121,19 +186,79 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Score Validation Status */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4" />
+              <span>Score Validation for Day {selectedDay}</span>
+            </h3>
             
-            {/* Debug info */}
-            <div className="mt-2 text-sm text-gray-600">
-              {hasScores ? (
-                <span className="text-green-600">
-                  ✓ Scores available for Day {selectedDay} ({Object.keys(debugHoleScores).length} holes with scores)
-                </span>
-              ) : (
-                <span className="text-orange-600">
-                  ⚠ No scores found for Day {selectedDay}. Enter scores first in the Score Entry tab.
-                </span>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="flex items-center space-x-2 mb-2">
+                  {scoreAnalysis.totalScoresEntered > 0 ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  )}
+                  <span className="font-medium">Total Scores Entered:</span>
+                  <span>{scoreAnalysis.totalScoresEntered}</span>
+                </div>
+                
+                <div className="flex items-center space-x-2 mb-2">
+                  {scoreAnalysis.holesWithScores > 0 ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  )}
+                  <span className="font-medium">Holes with Scores:</span>
+                  <span>{scoreAnalysis.holesWithScores}/18</span>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  {scoreAnalysis.missingPlayers.length === 0 ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                  )}
+                  <span className="font-medium">Players with Scores:</span>
+                  <span>{selectedPlayers.length - scoreAnalysis.missingPlayers.length}/{selectedPlayers.length}</span>
+                </div>
+              </div>
+
+              <div>
+                {scoreAnalysis.missingPlayers.length > 0 && (
+                  <div className="mb-2">
+                    <span className="font-medium text-orange-600">Missing Scores:</span>
+                    <div className="text-xs text-orange-600 mt-1">
+                      {scoreAnalysis.missingPlayers.join(', ')}
+                    </div>
+                  </div>
+                )}
+
+                {scoreAnalysis.invalidScores.length > 0 && (
+                  <div>
+                    <span className="font-medium text-red-600">Invalid Scores:</span>
+                    <div className="text-xs text-red-600 mt-1">
+                      {scoreAnalysis.invalidScores.map(invalid => {
+                        const player = allPlayers.find(p => p.id === invalid.playerId);
+                        return `${player?.name} Hole ${invalid.hole}: ${invalid.score}`;
+                      }).join(', ')}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {!hasValidScores && (
+              <div className="mt-3 p-3 bg-orange-100 border border-orange-200 rounded-md">
+                <p className="text-sm text-orange-800">
+                  <strong>Action Required:</strong> Please enter scores for all players in the Score Entry tab before calculating skins.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Pot Size */}
@@ -176,6 +301,9 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {allPlayers.map(player => {
                 const isSelected = selectedPlayers.some(p => p.id === player.id);
+                const playerScoreCount = scoreAnalysis.playerScoreCount[player.id] || 0;
+                const hasScores = playerScoreCount > 0;
+                
                 return (
                   <button
                     key={player.id}
@@ -186,8 +314,25 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
                         : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                     }`}
                   >
-                    <div className="font-medium">{player.name}</div>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-medium">{player.name}</div>
+                      {isSelected && hasScores && (
+                        <CheckCircle className="h-3 w-3 text-green-500" />
+                      )}
+                      {isSelected && !hasScores && (
+                        <AlertCircle className="h-3 w-3 text-orange-500" />
+                      )}
+                    </div>
                     <div className="text-xs opacity-75">HCP {player.handicap}</div>
+                    {isSelected && (
+                      <div className="text-xs mt-1">
+                        {hasScores ? (
+                          <span className="text-green-600">{playerScoreCount} scores</span>
+                        ) : (
+                          <span className="text-orange-600">No scores</span>
+                        )}
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -198,9 +343,9 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
           <div className="flex justify-center pt-4">
             <button
               onClick={calculateSkins}
-              disabled={selectedPlayers.length < 2 || !hasScores}
+              disabled={!canCalculate}
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                selectedPlayers.length >= 2 && hasScores
+                canCalculate
                   ? 'bg-green-600 text-white hover:bg-green-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
@@ -208,12 +353,18 @@ export const SkinsCalculator: React.FC<SkinsCalculatorProps> = ({ onBack }) => {
               <Calculator className="h-5 w-5" />
               <span>Calculate Skins</span>
             </button>
-            {selectedPlayers.length >= 2 && !hasScores && (
-              <p className="text-sm text-orange-600 mt-2 text-center">
-                Please enter scores for Day {selectedDay} first
-              </p>
-            )}
           </div>
+          
+          {!canCalculate && (
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                {selectedPlayers.length < 2 
+                  ? 'Select at least 2 players to calculate skins'
+                  : 'Enter scores for all selected players before calculating'
+                }
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
