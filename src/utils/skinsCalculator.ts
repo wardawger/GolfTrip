@@ -9,13 +9,8 @@ export const calculateSkinsNetScore = (
   day: number,
   playerName?: string
 ): number => {
-  // Designated players (Drew, Dan Y, MJ, Bryan) use gross scores only for skins
-  const designatedPlayers = ['Drew', 'Dan Y', 'MJ', 'Bryan'];
-  
-  if (playerName && designatedPlayers.includes(playerName)) {
-    return grossScore;
-  }
-  
+  // For skins, ALL players use handicap-based net scoring
+  // The handicap exclusion only applies to Modified Cha Cha Cha team scoring
   return calculateNetScore(grossScore, handicap, holeNumber, day);
 };
 
@@ -67,7 +62,7 @@ export const calculateSkinsGame = (
     const holeData = courseHoles.find(h => h.hole === holeNum);
     const holeScoreData = holeScores[holeNum] || [];
     
-    // Calculate net scores for this hole
+    // Calculate net scores for this hole - ALL players use handicap-based scoring for skins
     const playerScores = holeScoreData
       .filter(score => players.some(p => p.id === score.playerId))
       .map(score => {
