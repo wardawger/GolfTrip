@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Team, Player, HoleScore } from '../types';
 import { courseDataByDay } from '../data/course';
-import { calculateNetScore, calculateAsteriskNetScore, calculateAsteriskBonusStrokes } from '../utils/scoring';
+import { calculatePlayerNetScore, calculateAsteriskBonusStrokes } from '../utils/scoring';
 import { ArrowLeft, Save, Star } from 'lucide-react';
 
 interface ScoreEntryProps {
@@ -54,13 +54,6 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
     }));
   };
 
-  const calculatePlayerNetScore = (player: Player, grossScore: number, bonusUsed: number = 0) => {
-    if (player.isAsterisk) {
-      return calculateAsteriskNetScore(grossScore, player.handicap, selectedHole, bonusUsed, day);
-    }
-    return calculateNetScore(grossScore, player.handicap, selectedHole, day);
-  };
-
   const saveScores = () => {
     setIsSaving(true);
     
@@ -69,7 +62,7 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
       if (playerScore?.gross && !isNaN(Number(playerScore.gross))) {
         const grossScore = Number(playerScore.gross);
         const bonusUsed = player.isAsterisk ? Number(playerScore.bonusUsed) || 0 : 0;
-        const netScore = calculatePlayerNetScore(player, grossScore, bonusUsed);
+        const netScore = calculatePlayerNetScore(player, grossScore, selectedHole, bonusUsed, day);
         
         updateHoleScore(day, selectedHole, player.id, {
           playerId: player.id,
@@ -165,8 +158,12 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
               const playerScore = scores[player.id] || { gross: '', bonusUsed: '0' };
               const grossScore = Number(playerScore.gross) || 0;
               const bonusUsed = Number(playerScore.bonusUsed) || 0;
-              const netScore = grossScore > 0 ? calculatePlayerNetScore(player, grossScore, bonusUsed) : 0;
+              const netScore = grossScore > 0 ? calculatePlayerNetScore(player, grossScore, selectedHole, bonusUsed, day) : 0;
               const maxBonus = getMaxBonusStrokes();
+
+              // Check if this player is playing at scratch
+              const scratchPlayers = ['Drew', 'Dan Y', 'MJ', 'Bryan'];
+              const isPlayingScratch = scratchPlayers.includes(player.name);
 
               return (
                 <div key={player.id} className="bg-gray-50 rounded-lg p-4">
@@ -174,7 +171,14 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
                     <div className="flex items-center space-x-2">
                       <span className="font-medium text-gray-900">{player.name}</span>
                       {player.isAsterisk && <Star className="h-4 w-4 text-amber-500" />}
-                      <span className="text-sm text-gray-500">HCP {player.handicap}</span>
+                      <span className="text-sm text-gray-500">
+                        HCP {player.handicap}
+                        {isPlayingScratch && (
+                          <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded">
+                            (Playing Scratch)
+                          </span>
+                        )}
+                      </span>
                     </div>
                     <div className="text-sm text-gray-600">
                       Net Score: <span className="font-semibold">{netScore || '-'}</span>

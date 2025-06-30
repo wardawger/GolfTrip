@@ -1,6 +1,13 @@
 import { Player, HoleScore, Team, Segment } from '../types';
 import { courseData, courseDataByDay } from '../data/course';
 
+// Players who should be treated as scratch (0 handicap) for calculations
+const SCRATCH_PLAYERS = ['Drew', 'Dan Y', 'MJ', 'Bryan'];
+
+const getEffectiveHandicap = (player: Player): number => {
+  return SCRATCH_PLAYERS.includes(player.name) ? 0 : player.handicap;
+};
+
 export const calculateNetScore = (grossScore: number, handicap: number, holeNumber: number, day: number = 1): number => {
   const courseHoles = courseDataByDay[day as keyof typeof courseDataByDay] || courseData;
   const hole = courseHoles.find(h => h.hole === holeNumber);
@@ -10,6 +17,15 @@ export const calculateNetScore = (grossScore: number, handicap: number, holeNumb
   const extraStrokes = handicap % 18;
   const additionalStroke = holeHandicap <= extraStrokes ? 1 : 0;
   return grossScore - strokesPerHole - additionalStroke;
+};
+
+export const calculatePlayerNetScore = (player: Player, grossScore: number, holeNumber: number, bonusUsed: number = 0, day: number = 1): number => {
+  const effectiveHandicap = getEffectiveHandicap(player);
+  
+  if (player.isAsterisk) {
+    return calculateAsteriskNetScore(grossScore, effectiveHandicap, holeNumber, bonusUsed, day);
+  }
+  return calculateNetScore(grossScore, effectiveHandicap, holeNumber, day);
 };
 
 export const calculateAsteriskBonusStrokes = (holeNumber: number, day: number = 1): number => {
