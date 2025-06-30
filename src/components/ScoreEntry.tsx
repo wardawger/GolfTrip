@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Team, Player, HoleScore } from '../types';
 import { courseDataByDay } from '../data/course';
 import { calculatePlayerNetScore, calculateAsteriskBonusStrokes } from '../utils/scoring';
-import { ArrowLeft, Save, Star } from 'lucide-react';
+import { ArrowLeft, Save, Star, MapPin } from 'lucide-react';
 
 interface ScoreEntryProps {
   team: Team;
@@ -11,6 +11,12 @@ interface ScoreEntryProps {
   getHoleScores: (day: number, hole: number) => HoleScore[];
   updateHoleScore: (day: number, hole: number, playerId: string, score: Partial<HoleScore>) => void;
 }
+
+const courseNames = {
+  1: 'Southern Pines Golf Club',
+  2: 'Tot Hill Farm Golf Club',
+  3: 'Tobacco Road Golf Club'
+};
 
 export const ScoreEntry: React.FC<ScoreEntryProps> = ({
   team,
@@ -113,7 +119,10 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
             </button>
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-900">{team.name}</h2>
-              <p className="text-gray-600">Day {day} Scoring</p>
+              <div className="flex items-center justify-center space-x-2 text-gray-600">
+                <MapPin className="h-4 w-4" />
+                <span>Day {day} - {courseNames[day as keyof typeof courseNames]}</span>
+              </div>
             </div>
             <SaveButton />
           </div>

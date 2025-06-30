@@ -3,7 +3,7 @@ import { TeamCard } from './TeamCard';
 import { ScoreEntry } from './ScoreEntry';
 import { ResultsView } from './ResultsView';
 import { Team } from '../types';
-import { BarChart3, Target } from 'lucide-react';
+import { BarChart3, Target, MapPin } from 'lucide-react';
 
 interface DashboardProps {
   currentDay: number;
@@ -12,6 +12,12 @@ interface DashboardProps {
   getAllHoleScores: (day: number) => { [hole: number]: any[] };
   updateHoleScore: (day: number, hole: number, playerId: string, score: any) => void;
 }
+
+const courseNames = {
+  1: 'Southern Pines Golf Club',
+  2: 'Tot Hill Farm Golf Club',
+  3: 'Tobacco Road Golf Club'
+};
 
 export const Dashboard: React.FC<DashboardProps> = ({
   currentDay,
@@ -72,7 +78,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {activeTab === 'teams' ? (
         <div>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Day {currentDay} Teams</h2>
+            <div className="flex items-center space-x-3 mb-2">
+              <MapPin className="h-5 w-5 text-green-600" />
+              <h2 className="text-2xl font-bold text-gray-900">
+                Day {currentDay} - {courseNames[currentDay as keyof typeof courseNames]}
+              </h2>
+            </div>
             <p className="text-gray-600">Select a team to enter scores</p>
           </div>
 

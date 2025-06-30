@@ -2,13 +2,19 @@ import React from 'react';
 import { Team } from '../types';
 import { segments, payoutSegments } from '../data/course';
 import { calculateTeamSegmentScore, findSegmentWinners } from '../utils/scoring';
-import { Trophy, DollarSign } from 'lucide-react';
+import { Trophy, DollarSign, MapPin } from 'lucide-react';
 
 interface ResultsViewProps {
   day: number;
   teams: Team[];
   getAllHoleScores: (day: number) => { [hole: number]: any[] };
 }
+
+const courseNames = {
+  1: 'Southern Pines Golf Club',
+  2: 'Tot Hill Farm Golf Club',
+  3: 'Tobacco Road Golf Club'
+};
 
 export const ResultsView: React.FC<ResultsViewProps> = ({ day, teams, getAllHoleScores }) => {
   const holeScores = getAllHoleScores(day);
@@ -69,7 +75,13 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ day, teams, getAllHole
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center space-x-3 mb-6">
           <Trophy className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-2xl font-bold text-gray-900">Day {day} Results</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Day {day} Results</h2>
+            <div className="flex items-center space-x-2 text-gray-600 mt-1">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm">{courseNames[day as keyof typeof courseNames]}</span>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-6">
