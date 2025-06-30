@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Team, Player, HoleScore } from '../types';
 import { courseDataByDay } from '../data/course';
 import { calculatePlayerNetScore, calculateAsteriskBonusStrokes } from '../utils/scoring';
-import { ArrowLeft, Save, Star, MapPin } from 'lucide-react';
+import { ArrowLeft, Save, Star, MapPin, Info } from 'lucide-react';
 
 interface ScoreEntryProps {
   team: Team;
@@ -105,6 +105,13 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
     </button>
   );
 
+  const getBonusStrokeText = (par: number) => {
+    if (par === 5) return "3 bonus strokes";
+    if (par === 4) return "2 bonus strokes";
+    if (par === 3) return "1 bonus stroke";
+    return "0 bonus strokes";
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white rounded-lg shadow-lg">
@@ -150,6 +157,23 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Asterisk Player Rules Info */}
+        {team.players.some(p => p.isAsterisk) && (
+          <div className="p-4 bg-amber-50 border-b border-amber-200">
+            <div className="flex items-start space-x-3">
+              <Info className="h-5 w-5 text-amber-600 mt-0.5" />
+              <div className="text-sm text-amber-800">
+                <div className="font-medium mb-2">Asterisk Player Rules for Hole {selectedHole} (Par {currentHole.par}):</div>
+                <div className="space-y-1">
+                  <div>• <strong>Bonus Strokes:</strong> {getBonusStrokeText(currentHole.par)}</div>
+                  <div>• <strong>Ball Rules:</strong> Playing own ball preserves bonus strokes, playing teammate's ball costs 1 bonus stroke</div>
+                  <div>• <strong>Scoring:</strong> Unused bonus strokes are subtracted from gross score</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Score Entry */}
         <div className="p-6">
@@ -225,7 +249,7 @@ export const ScoreEntry: React.FC<ScoreEntryProps> = ({
                           ))}
                         </select>
                         <p className="text-xs text-gray-500 mt-1">
-                          Max {maxBonus} bonus strokes available
+                          Max {maxBonus} bonus strokes available (Par {currentHole.par})
                         </p>
                       </div>
                     )}

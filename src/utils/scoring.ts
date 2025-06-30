@@ -32,7 +32,12 @@ export const calculateAsteriskBonusStrokes = (holeNumber: number, day: number = 
   const courseHoles = courseDataByDay[day as keyof typeof courseDataByDay] || courseData;
   const hole = courseHoles.find(h => h.hole === holeNumber);
   if (!hole) return 0;
-  return hole.par === 3 ? 2 : 3;
+  
+  // New bonus stroke rules
+  if (hole.par === 5) return 3;
+  if (hole.par === 4) return 2;
+  if (hole.par === 3) return 1;
+  return 0;
 };
 
 export const calculateAsteriskNetScore = (
